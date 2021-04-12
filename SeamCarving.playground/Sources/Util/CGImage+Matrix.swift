@@ -1,6 +1,6 @@
 import Foundation
 
-extension CGImage {
+public extension CGImage {
     // CGContext init parameters from
     // https://developer.apple.com/library/archive/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/dq_context/dq_context.html#//apple_ref/doc/uid/TP30001066-CH203-BCIBHHBB
     
