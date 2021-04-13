@@ -33,22 +33,27 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
     // adds from the bottom up, so it goes in reverse order
     // skips the very bottom row because it was already copied over
     for row in (0..<height-1).reversed() {
+        // the offset in the buffer that the current row starts at
         let rowStart = row * buffer.rowBytes
+        
         for col in 0..<width {
             // get the three values below the current pixel
-            // if values are out of bounds they are not added
-            // middle is always valid, so add it
-            // it is faster to add three middles than appending each time
-            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = Array(repeating: (0,  intensitySums[row + 1][col]), count: 3)
+            // if values are out of bounds the center value is added (because of the min and max)
+            // it is faster to add multiple middles then allocating on the fly
+            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = [
+                (-1, intensitySums[row + 1][max(col - 1, 0)]),
+                (0,  intensitySums[row + 1][col]),
+                (1, intensitySums[row + 1][min(col + 1, width - 1)])
+            ]
             
-            // replace left or right if the pixel is on the edge
-            if col - 1 >= 0 {
-                // left
-                valuesBelow[1] = (-1, intensitySums[row + 1][col - 1])
-            }
-            if col + 1 < width {
-                // right
-                valuesBelow[2] = (1, intensitySums[row + 1][col + 1])
+            // replace left index if it is equal to the center pixel
+            // that either occurs because there is no left pixel or they just happen to be the same
+            // in both cases, the preferred direction would be downwards
+            //
+            // because the min function uses <,
+            // it is not necessary to change the index of the right pixel if they are equal
+            if valuesBelow[0].intensitySum == valuesBelow[1].intensitySum {
+                valuesBelow[0].direction = 0
             }
             
             // add together lowest intensity below and intensity of current pixel
@@ -62,10 +67,9 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
     }
     
     return (intensitySums, directions)
-    
 }
 
-func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]], directions: [[Int8]]) {
+public func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]], directions: [[Int8]]) {
     // make blank arrays of the appropriate size to store the output
     let width = intensities[0].count
     let height = intensities.count
@@ -87,19 +91,22 @@ func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]], direct
     for row in (0..<height-1).reversed() {
         for col in 0..<width {
             // get the three values below the current pixel
-            // if values are out of bounds they are not added
-            // middle is always valid, so add it
-            // it is faster to add three middles than appending each time
-            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = Array(repeating: (0,  intensitySums[row + 1][col]), count: 3)
+            // if values are out of bounds the center value is added (because of the min and max)
+            // it is faster to add multiple middles then allocating on the fly
+            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = [
+                (-1, intensitySums[row + 1][max(col - 1, 0)]),
+                (0,  intensitySums[row + 1][col]),
+                (1, intensitySums[row + 1][min(col + 1, width - 1)])
+            ]
             
-            // replace left or right if the pixel is on the edge
-            if col - 1 >= 0 {
-                // left
-                valuesBelow[1] = (-1, intensitySums[row + 1][col - 1])
-            }
-            if col + 1 < width {
-                // right
-                valuesBelow[2] = (1, intensitySums[row + 1][col + 1])
+            // replace left index if it is equal to the center pixel
+            // that either occurs because there is no left pixel or they just happen to be the same
+            // in both cases, the preferred direction would be downwards
+            //
+            // because the min function uses <,
+            // it is not necessary to change the index of the right pixel if they are equal
+            if valuesBelow[0].intensitySum == valuesBelow[1].intensitySum {
+                valuesBelow[0].direction = 0
             }
             
             // add together lowest intensity below and intensity of current pixel
@@ -113,7 +120,6 @@ func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]], direct
     }
     
     return (intensitySums, directions)
-    
 }
 
 // this could be implemented as a shader
