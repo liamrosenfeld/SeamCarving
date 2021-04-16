@@ -14,7 +14,7 @@
  Now without further ado, let's dig into this together.
  
  Note:
- - Some pages may take a couple seconds to run because there are some computation heavy operations
+ - Some pages may take a couple seconds to run because there are some computation heavy operations. The results view will update during, so you would be able to tell the difference between computing and playgrounds hanging.
  - Due to the highly iterative nature of some code in this playground, the results sidebar would slow it down dramatically. For that reason, code is sometimes explained and then run from somewhere else. This is often done by prefixing functions on the page with an underscore and then calling one without.
  - A good amount of code that is unnecessary for understanding the central algorithm is abstracted away as functions. If you would like to see it, you can either jump to definition or look through the global sources folder of the playground.
  

@@ -122,6 +122,9 @@ import Metal
 import MetalKit
 
 // get image
+// this playground will use The Persistence Of Memory by Salvador Dalí during the explanation sections
+// that is because of how its well defined edges and open areas
+// more images (including your own) will be available to use on the last page)
 let image = NSImage(named: "pom.png")!.cgImage
 
 // calling a metal function has a bit of boilerplate
