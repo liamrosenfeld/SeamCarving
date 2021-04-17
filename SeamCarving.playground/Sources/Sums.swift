@@ -37,32 +37,21 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
         let rowStart = row * buffer.rowBytes
         
         for col in 0..<width {
-            // get the three values below the current pixel
-            // if values are out of bounds the center value is added (because of the min and max)
-            // it is faster to add multiple middles then allocating on the fly
-            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = [
-                (-1, intensitySums[row + 1][max(col - 1, 0)]),
-                (0,  intensitySums[row + 1][col]),
-                (1, intensitySums[row + 1][min(col + 1, width - 1)])
-            ]
-            
-            // replace left index if it is equal to the center pixel
-            // that either occurs because there is no left pixel or they just happen to be the same
-            // in both cases, the preferred direction would be downwards
-            //
-            // because the min function uses <,
-            // it is not necessary to change the index of the right pixel if they are equal
-            if valuesBelow[0].intensitySum == valuesBelow[1].intensitySum {
-                valuesBelow[0].direction = 0
-            }
+            // get min of the the three values below the current pixel
+            // if values are out of bounds the center value is used (that is what the min and maxes are doing)
+            // our custom min function ignores them if they have the same value as the center
+            let (minBelow, minIndex) = minWithIndex(
+                intensitySums[row + 1][max(col - 1, 0)],
+                intensitySums[row + 1][col],
+                intensitySums[row + 1][min(col + 1, width - 1)]
+            )
             
             // add together lowest intensity below and intensity of current pixel
-            let smallestIntensityBelow = valuesBelow.min { $0.intensitySum < $1.intensitySum }!
             let intensityForThisPixel = UInt32(dataBuffer[rowStart + col]) // cast up to prevent overflow when adding
-            intensitySums[row][col] = smallestIntensityBelow.intensitySum + intensityForThisPixel
+            intensitySums[row][col] = minBelow + intensityForThisPixel
             
             // add direction to the array
-            directions[row][col] = smallestIntensityBelow.direction
+            directions[row][col] = minIndex - 1
         }
     }
     
@@ -90,36 +79,40 @@ public func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]],
     // skips the very bottom row because it was already copied over
     for row in (0..<height-1).reversed() {
         for col in 0..<width {
-            // get the three values below the current pixel
-            // if values are out of bounds the center value is added (because of the min and max)
-            // it is faster to add multiple middles then allocating on the fly
-            var valuesBelow: [(direction: Int8, intensitySum: UInt32)] = [
-                (-1, intensitySums[row + 1][max(col - 1, 0)]),
-                (0,  intensitySums[row + 1][col]),
-                (1, intensitySums[row + 1][min(col + 1, width - 1)])
-            ]
-            
-            // replace left index if it is equal to the center pixel
-            // that either occurs because there is no left pixel or they just happen to be the same
-            // in both cases, the preferred direction would be downwards
-            //
-            // because the min function uses <,
-            // it is not necessary to change the index of the right pixel if they are equal
-            if valuesBelow[0].intensitySum == valuesBelow[1].intensitySum {
-                valuesBelow[0].direction = 0
-            }
+            // get min of the the three values below the current pixel
+            // if values are out of bounds the center value is used (that is what the min and maxes are doing)
+            // our custom min function ignores them if they have the same value as the center
+            let (minBelow, minIndex) = minWithIndex(
+                intensitySums[row + 1][max(col - 1, 0)],
+                intensitySums[row + 1][col],
+                intensitySums[row + 1][min(col + 1, width - 1)]
+            )
             
             // add together lowest intensity below and intensity of current pixel
-            let smallestIntensityBelow = valuesBelow.min { $0.intensitySum < $1.intensitySum }!
             let intensityForThisPixel = UInt32(intensities[row][col]) // cast up to prevent overflow when adding
-            intensitySums[row][col] = smallestIntensityBelow.intensitySum + intensityForThisPixel
+            intensitySums[row][col] = minBelow + intensityForThisPixel
             
             // add direction to the array
-            directions[row][col] = smallestIntensityBelow.direction
+            directions[row][col] = minIndex - 1
         }
     }
     
     return (intensitySums, directions)
+}
+
+// prefers the middle column if they are the same
+func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt32, index: Int8) {
+    var index: Int8 = 1
+    var min = val1
+    if val0 < min {
+        index = 0
+        min = val0
+    }
+    if val2 < min {
+        index = 2
+        min = val2
+    }
+    return (min, index)
 }
 
 // this could be implemented as a shader

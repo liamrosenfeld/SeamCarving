@@ -57,7 +57,7 @@ carved
 /*:
  ## Potential Optimization
  
- The two components of each seam removal which take up the most time are the summing function and the Sobel filter. Over my time working on this project I have highly optimized the summing function, gradually bringing it down from over 100ms a pass to 3ms.
+ The two components of each seam removal which take up the most time are the summing function and the Sobel filter. Over my time working on this project I have highly optimized the summing function, gradually bringing it down from over 100ms a pass to 3ms (the git history for that function is quite interesting).
  
  That makes the next obvious target the Sobel filter. Because of running on the GPU, the Sobel filter is already highly optimized, clocking in at only around 5ms per application. However, there is a method that would greatly reduce the total time spent on the Sobel filter.
  
