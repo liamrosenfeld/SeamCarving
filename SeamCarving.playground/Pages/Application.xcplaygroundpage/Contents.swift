@@ -42,11 +42,7 @@ func _carveImage(_ image: CGImage, width: Int) -> CGImage {
 
 //: Now let's use that to shrink our image a noticeable amount
 
-// Decrease the size of the image to keep the playground running quickly
-let maxSize = NSSize(width: 350, height: 350)
-let image = NSImage(named: "pom")!.constrained(to: maxSize).cgImage
-
-// Use our function
+let image  = ImageFile.get(named: "pom.png").scaledArgbImage()!.cgImage
 let carved = carveImage(image, width: 310)
 
 //: Let's compare our carved image to the original

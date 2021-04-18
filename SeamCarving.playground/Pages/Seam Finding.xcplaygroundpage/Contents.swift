@@ -142,7 +142,7 @@ func _edginessSums(buffer: vImage_Buffer) -> (edginessSums: [[UInt32]], directio
 import AppKit
 
 // get sobeled image
-let image = NSImage(named: "pom.png")!.cgImage
+let image = ImageFile.get(named: "pom.png").scaledArgbImage()!.cgImage
 let sobeled = sobel(image)
 let buffer = sobeled.planarBuffer
 

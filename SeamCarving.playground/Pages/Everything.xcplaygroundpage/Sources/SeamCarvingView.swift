@@ -44,7 +44,7 @@ public struct SeamCarvingView: View {
             Image(nsImage: dispImage)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 300, height: 300)
+                .frame(width: 350, height: 350)
             
             HStack {
                 Text("Original Width: \(Int(origImage.size.width))")
