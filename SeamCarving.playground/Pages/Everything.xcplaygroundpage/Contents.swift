@@ -30,4 +30,6 @@ PlaygroundPage.current.setLiveView(SeamCarvingView())
  * By Broadway_tower.jpg: Newton2 at en.wikipediaderivative work: Damir-NJITWILL (talk) - Broadway_tower.jpg, CC BY 2.5, https://commons.wikimedia.org/w/index.php?curid=12125976
  * Tree from Adobe Stock
  
+ All others were made by me
+ 
  */

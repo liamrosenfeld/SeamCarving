@@ -4,37 +4,48 @@
  Seams will be what we call the path of pixels that we remove from the image to reduce its width.
  
  Our criteria for the seam is as follows:
- - The path that crosses the least edges
+ - The path that crosses the least edges (value of pixel from the Sobel Filter)
  - The path can lead to the three pixels under it (directly under and both diagonally adjacent)
+ 
+ Those three candidates are shown on this diagram:
+ 
+ ![Candidate Diagram](/CandidateDiagram.jpg)
  
  ## Possible Algoritms
  
- One attempt at finding this seem may be using a greedy algorithm. The lowest of the three candidates would be chosen for each row of the image. While that may be optimized, it would have issues consistency finding the best path. The seam can only move so fast horizontally because it can only move by one column per row, so taking a strictly greedy algorithm could easily get the seam stuck only having the option between pixels with a high edginess.
+ One attempt at finding this seem may be using a greedy algorithm. A greedy algorithm is one that always picks the immediately most optimal option. In this case, it would always pick the lowest of the three three candidates available for each row of the image.
  
- The pitfall of now knowing if the path is the most optimal path possible can be removed by using an algorithm that checks for all possible paths through an image.
- It would then choose the path where the sum of all the edginess values is the least. While that would always give us the best possible path through an image, it is also extremely slow. The time complexity would on the order of 3^rows, which means it would no be practical to apply to any reasonably sized image.
+ While that may be optimized for performance, it has issues consistently finding the best path.
+ 
+ The seam has a maximum horizontal speed of one column per row, so taking a strictly greedy algorithm could easily get the seam stuck only having candidates with high edginess later in the image.
+ 
+ The pitfall of not knowing if the path is the most optimal path possible can be removed by using an algorithm that checks for all possible paths through an image.
+ 
+ It would then choose the path where the sum of all the edginess values is the least. While that would always give us the best possible path through an image, it is also extremely slow.
+ 
+ The time complexity of that method would on the order of cols * 3^rows, which means it would not be practical use on any reasonably sized image.
  
  ## Optimizing Through Dynamic Programming
  
- Dynamic programming is a technique for optimizing algorithms by breaking them into subparts that are able to be shared.
+ Dynamic programming is a technique for optimizing algorithms by breaking them into subparts that are able to be shared by other subparts. That can greatly reduce the need for redundant work.
  
- The fundamental fact that will allow us to optimize is that at each pixel, there is a path of least edginess to the bottom of the image, that path is will be the path of the rest of the seam if that pixel is in the seam.
+ The fundamental fact that will allow us to optimize is that at each pixel, there is a path of minimum total edginess to the bottom of the image. Since that will always be the optimal path from that pixel, any seam that includes that pixel will follow that path for the rest of the image.
  
- That allows us to assign each pixel the value of the total edginess the most optimal path to the bottom.
+ That allows us to assign each pixel a value of the total edginess of the most optimal path to the bottom. Using that value for calculating the value of pixels above greatly decreases the amount of redundant work needed—a major dynamic programming win.
  
- That matrix of sums can be built from the bottom up, so all that would be necessary for finding the sum at each pixel get the minimum sum of the candidates below it and then add it to the value of itself.
+ To find the value for each pixel, the matrix of sums can be built from the bottom up. Since the total sum at each candidate would be known, all that would be necessary for finding the sum at each pixel is to add minimum candidate sum and the value of itself.
 
  That greatly optimizes the algorithm by removing the redundant work, bringing the time complexity down to the much more reasonable 3 * rows * cols.
  
  # Implementation
  
- We fist need a min function that is able to find the minimum value and the index of that value. While an enumerated array would make sense for finding the minimum amount a larger collection of values, a flattened version is more performance friendly.
+ We fist need a min function that is able to find the minimum value and the index of that value. While an enumerated array would make sense for finding the minimum amount of a larger collection of values, a flattened version is more performance friendly.
  
  This function also differs from most min finding functions because it prefers the middle value over the sides if they are equal.
  
- This is preferable because it occurs when there is no left or right pixel (the min and max on the index prevents overflows inline that way) along with general preference for the seam to travel straight down if the options are exactly equivalent (leads to a generally less noticeable removal).
+ This is preferable because they are equal when there is no left or right pixel (min and max are used to prevent overflows inline) along with general preference for the seam to travel straight down if the options happen to be equivalent (leads to a generally less noticeable removal).
  
- This min function with our specific criteria can be implemented as below
+ This min function with our specific criteria can be implemented as below:
  */
 
 func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt32, index: Int8) {
@@ -58,9 +69,12 @@ func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt3
 }
 
 /*:
- Now we can use that function inside of our intensity summing function.
+ Now we can use that function inside of our edge summing function.
  
- Our function will take in an 8-bit planar accelerate buffer of the result of our Sobel filter.
+ Our function will take the result of our Sobel filter as an 8-bit planar accelerate buffer.
+ 
+ It will the return the sum and the direction to the smallest candidate at each pixel as two separate matrixes.
+ They will both be needed to calculate our seam.
  
  How each part of the function works is explained in the inline comments.
  */
@@ -120,11 +134,9 @@ func _intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], direct
 }
 
 /*:
- The function returns two matrixes, one is the matrix of sums. The other is the direction to the sum of least value, which will speed up finding the seam because that will not need to be recomputed.
+ Let's get the sums and directions and then visualize them as images.
  
- Let's get both of those from our function and then visualize them as images.
- 
- (This will call an identical function in a different file because the side view updating would make it unbearably slow)
+ (This will call an identical function in a different file because the side view updating would make it unbearably slow.)
  */
 
 import AppKit
@@ -143,17 +155,17 @@ let sumsImage = CGImage.scaledGrayscaleFromMatrix(sums)
 let dirsColors = directionsToColorMatrix(dirs) // expresses left, center, and right as RGB respectively
 let dirsImage = CGImage.argbFromMatrix(dirsColors)
 
-//: Now we can see the results of the algorithm in the live view
+//: Now we can see the results of the algorithm in the in the results view after running this page:
 
 sumsImage
 dirsImage
 
 /*:
- The triangular pattern that appears in the sums is significant because it marks out places that if the path ever touched, there would be no way to dodge the edge causing the triangle because, of the maximum rate the path can travel horizontally.
+ The triangular pattern that appears in the sums is significant because it marks out places, that if the path ever touched, there would be no way to dodge the edge causing the triangle because of the maximum rate the path can travel horizontally.
  
  # Seam Finding
  
- Now that we have the directions for every pixel in the image and the sum of the path of minimum edginess from each pixel in the top row, an array containing the col of each pixel to remove can be easily derived.
+ Now that we have the directions for every pixel in the image and the sum of the path of minimum edginess from each pixel in the top row, an array containing the column of each pixel to remove can be easily derived.
  
  The function to do so is
  */
@@ -179,17 +191,15 @@ func _findSeam(intensitySum: [[UInt32]], directions: [[Int8]]) -> [Int] {
     return seam
 }
 
-//: Now let's find the seam using the function we made
+//: Let's find the seam using the function we made and then overlay it on the original image
 
 let seam = findSeam(intensitySum: sums, directions: dirs)
-
-//: And then overlay it on the original image
 
 var imageMatrix = image.argbBuffer.argb8ToMatrix()
 let overlayedMatrix = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000) // draw the seam in bid endian green
 let overlayedImage = CGImage.argbFromMatrix(overlayedMatrix)
 
-//: You can now see how the green line dodges important parts of the image
+//: You can see how the green line dodges important parts of the image
 
 overlayedImage
 
