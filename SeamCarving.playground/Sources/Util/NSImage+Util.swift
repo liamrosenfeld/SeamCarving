@@ -6,6 +6,11 @@ public extension NSImage {
         self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
     }
     
+    var realSize: NSSize {
+        let rep = representations[0]
+        return NSSize(width: rep.pixelsWide, height: rep.pixelsHigh)
+    }
+    
     convenience init(ciImage: CIImage) {
         let rep = NSCIImageRep(ciImage: ciImage)
         self.init(size: rep.size)
@@ -29,8 +34,8 @@ public extension NSImage {
     func constrained(to constraint: NSSize) -> NSImage {
         // don't resize if already small enough
         let isTooBig =
-            self.size.width  > constraint.width ||
-            self.size.height > constraint.height
+            self.realSize.width  > constraint.width ||
+            self.realSize.height > constraint.height
         if !isTooBig {
             return self
         }

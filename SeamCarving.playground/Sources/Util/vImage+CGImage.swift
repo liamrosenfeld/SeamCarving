@@ -1,15 +1,5 @@
 import Accelerate.vImage
 
-public extension vImage_Buffer {
-    func toImage(format: vImage_CGImageFormat) -> CGImage {
-        do {
-            return try self.createCGImage(format: format)
-        } catch let err {
-            fatalError(err.localizedDescription)
-        }
-    }
-}
-
 public extension CGImage {
     var planarBuffer: vImage_Buffer {
         let sourceFormat = vImage_CGImageFormat(cgImage: self)!
