@@ -69,7 +69,7 @@ func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt3
 }
 
 /*:
- Now we can use that function inside of our edge summing function.
+ Now we can use that function inside of our edginess summing function.
  
  Our function will take the result of our Sobel filter as an 8-bit planar accelerate buffer.
  
@@ -81,7 +81,7 @@ func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt3
 
 import Accelerate.vImage
 
-func _intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], directions: [[Int8]]) {
+func _edginessSums(buffer: vImage_Buffer) -> (edginessSums: [[UInt32]], directions: [[Int8]]) {
     // make blank arrays of the appropriate size to store the output
     let width = Int(buffer.width)
     let height = Int(buffer.height)
@@ -89,7 +89,7 @@ func _intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], direct
     // the values of path of least energy
     // max vertical resolution is 2^32/2^8 = 16,777,216
     // because that would be the amount of pixels it would take to overflow if every pixel of the edge detection is maxed out
-    var intensitySums: [[UInt32]] = zeros(width: width, height: height)
+    var edginessSums: [[UInt32]] = zeros(width: width, height: height)
     // the direction to the least point of least energy below (-1: left, 0: center, 1: right)
     var directions: [[Int8]] = zeros(width: width, height: height)
     
@@ -102,7 +102,7 @@ func _intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], direct
     // the bottom row is the same (no intensities below to add to it) so it can be copied over
     let lastRowStart = (height - 1) * buffer.rowBytes
     for col in 0..<width {
-        intensitySums[height-1][col] = UInt32(dataBuffer[lastRowStart + col])
+        edginessSums[height-1][col] = UInt32(dataBuffer[lastRowStart + col])
     }
     
     // adds from the bottom up, so it goes in reverse order
@@ -116,21 +116,21 @@ func _intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], direct
             // if values are out of bounds the center value is used (that is what the min and maxes are doing)
             // our custom min function ignores them if they have the same value as the center
             let (minBelow, minIndex) = minWithIndex(
-                intensitySums[row + 1][max(col - 1, 0)],
-                intensitySums[row + 1][col],
-                intensitySums[row + 1][min(col + 1, width - 1)]
+                edginessSums[row + 1][max(col - 1, 0)],
+                edginessSums[row + 1][col],
+                edginessSums[row + 1][min(col + 1, width - 1)]
             )
             
-            // add together lowest intensity below and intensity of current pixel
-            let intensityForThisPixel = UInt32(dataBuffer[rowStart + col]) // cast up to prevent overflow when adding
-            intensitySums[row][col] = minBelow + intensityForThisPixel
+            // add together lowest edginess below and edginess of current pixel
+            let edginessForThisPixel = UInt32(dataBuffer[rowStart + col]) // cast up to prevent overflow when adding
+            edginessSums[row][col] = minBelow + edginessForThisPixel
             
             // add direction to the array
             directions[row][col] = minIndex - 1
         }
     }
     
-    return (intensitySums, directions)
+    return (edginessSums, directions)
 }
 
 /*:
@@ -147,7 +147,7 @@ let sobeled = sobel(image)
 let buffer = sobeled.planarBuffer
 
 // get sums and direction from sobeled buffer
-let (sums, dirs) = intensitySums(buffer: buffer)
+let (sums, dirs) = edginessSums(buffer: buffer)
 buffer.free()
 
 // turn returned matrixes into images
@@ -170,12 +170,12 @@ dirsImage
  The function to do so is
  */
 
-func _findSeam(intensitySum: [[UInt32]], directions: [[Int8]]) -> [Int] {
-    var seam: [Int] = Array(repeating: 0, count: intensitySum.count)
+func _findSeam(edginessSums: [[UInt32]], directions: [[Int8]]) -> [Int] {
+    var seam: [Int] = Array(repeating: 0, count: edginessSums.count)
     
     // get the starting col
     // it will be the pixel with the minimum sum in the top row
-    let start = intensitySum[0]
+    let start = edginessSums[0]
         .enumerated()
         .min { $0.element < $1.element }!
         .offset
@@ -193,7 +193,7 @@ func _findSeam(intensitySum: [[UInt32]], directions: [[Int8]]) -> [Int] {
 
 //: Let's find the seam using the function we made and then overlay it on the original image
 
-let seam = findSeam(intensitySum: sums, directions: dirs)
+let seam = findSeam(edginessSums: sums, directions: dirs)
 
 var imageMatrix = image.argbBuffer.argb8ToMatrix()
 let overlayedMatrix = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000) // draw the seam in bid endian green

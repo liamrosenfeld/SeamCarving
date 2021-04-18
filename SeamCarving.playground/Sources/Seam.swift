@@ -7,10 +7,10 @@
 
 import Foundation
 
-public func findSeam(intensitySum: [[UInt32]], directions: [[Int8]]) -> [Int] {
-    var seam: [Int] = Array(repeating: 0, count: intensitySum.count)
+public func findSeam(edginessSums: [[UInt32]], directions: [[Int8]]) -> [Int] {
+    var seam: [Int] = Array(repeating: 0, count: edginessSums.count)
     
-    let start = intensitySum[0].enumerated().min { $0.element < $1.element }!.offset
+    let start = edginessSums[0].enumerated().min { $0.element < $1.element }!.offset
     seam[0] = start
     
     var col = start

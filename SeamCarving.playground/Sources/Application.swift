@@ -15,9 +15,9 @@ public func carveImage(_ image: CGImage, width: Int) -> CGImage {
     for _ in 0..<widthDiff {
         let sobeled = sobel(carvedImage)
         let grayscale = sobeled.planarBuffer
-        let (sums, dirs) = intensitySums(buffer: grayscale)
+        let (sums, dirs) = edginessSums(buffer: grayscale)
         grayscale.free()
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         var imageMatrix = carvedImage.argbBuffer.argb8ToMatrix()
         removeSeam(seam, from: &imageMatrix)
         carvedImage = CGImage.argbFromMatrix(imageMatrix)
@@ -40,8 +40,8 @@ public func sharedCarveImage(_ image: CGImage, width: Int) -> CGImage {
     grayscale.free()
     
     for _ in 0..<widthDiff {
-        let (sums, dirs) = intensitySums(intensities: sobelMatrix)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(intensities: sobelMatrix)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         removeSeam(seam, from: &imageMatrix)
         removeSeam(seam, from: &sobelMatrix)
     }
@@ -70,8 +70,8 @@ public func balancedCarveImage(_ image: CGImage, width: Int, sobelPer: Int) -> C
             sobelMatrix = grayscale.planarToMatrix()
         }
         
-        let (sums, dirs) = intensitySums(intensities: sobelMatrix)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(intensities: sobelMatrix)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         removeSeam(seam, from: &imageMatrix)
         removeSeam(seam, from: &sobelMatrix)
     }

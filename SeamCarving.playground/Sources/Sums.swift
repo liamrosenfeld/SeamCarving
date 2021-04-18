@@ -7,7 +7,7 @@
 
 import Accelerate.vImage
 
-public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], directions: [[Int8]]) {
+public func edginessSums(buffer: vImage_Buffer) -> (edginessSums: [[UInt32]], directions: [[Int8]]) {
     // make blank arrays of the appropriate size to store the output
     let width = Int(buffer.width)
     let height = Int(buffer.height)
@@ -15,7 +15,7 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
     // the values of path of least energy
     // max vertical resolution is 2^32/2^8 = 16,777,216
     // because that would be the amount of pixels it would take to overflow if every pixel of the edge detection is maxed out
-    var intensitySums: [[UInt32]] = zeros(width: width, height: height)
+    var edginessSums: [[UInt32]] = zeros(width: width, height: height)
     // the direction to the least point of least energy below (-1: left, 0: center, 1: right)
     var directions: [[Int8]] = zeros(width: width, height: height)
     
@@ -27,7 +27,7 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
     // the bottom row is the same (no intensities below to add to it) so it can be copied over
     let lastRowStart = (height - 1) * buffer.rowBytes
     for col in 0..<width {
-        intensitySums[height-1][col] = UInt32(dataBuffer[lastRowStart + col])
+        edginessSums[height-1][col] = UInt32(dataBuffer[lastRowStart + col])
     }
     
     // adds from the bottom up, so it goes in reverse order
@@ -41,24 +41,24 @@ public func intensitySums(buffer: vImage_Buffer) -> (intensitySums: [[UInt32]], 
             // if values are out of bounds the center value is used (that is what the min and maxes are doing)
             // our custom min function ignores them if they have the same value as the center
             let (minBelow, minIndex) = minWithIndex(
-                intensitySums[row + 1][max(col - 1, 0)],
-                intensitySums[row + 1][col],
-                intensitySums[row + 1][min(col + 1, width - 1)]
+                edginessSums[row + 1][max(col - 1, 0)],
+                edginessSums[row + 1][col],
+                edginessSums[row + 1][min(col + 1, width - 1)]
             )
             
-            // add together lowest intensity below and intensity of current pixel
-            let intensityForThisPixel = UInt32(dataBuffer[rowStart + col]) // cast up to prevent overflow when adding
-            intensitySums[row][col] = minBelow + intensityForThisPixel
+            // add together lowest edginess below and edginess of current pixel
+            let edginessForThisPixel = UInt32(dataBuffer[rowStart + col]) // cast up to prevent overflow when adding
+            edginessSums[row][col] = minBelow + edginessForThisPixel
             
             // add direction to the array
             directions[row][col] = minIndex - 1
         }
     }
     
-    return (intensitySums, directions)
+    return (edginessSums, directions)
 }
 
-public func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]], directions: [[Int8]]) {
+public func edginessSums(intensities: [[UInt8]]) -> (edginessSums: [[UInt32]], directions: [[Int8]]) {
     // make blank arrays of the appropriate size to store the output
     let width = intensities[0].count
     let height = intensities.count
@@ -66,13 +66,13 @@ public func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]],
     // the values of path of least energy
     // max vertical resolution is 2^32/2^8 = 16,777,216
     // because that would be the amount of pixels it would take to overflow if every pixel of the edge detection is maxed out
-    var intensitySums: [[UInt32]] = zeros(width: width, height: height)
+    var edginessSums: [[UInt32]] = zeros(width: width, height: height)
     // the direction to the least point of least energy below (-1: left, 0: center, 1: right)
     var directions: [[Int8]] = zeros(width: width, height: height)
     
     // the bottom row is the same (no intensities below to add to it) so it can be copied over
     for col in 0..<width {
-        intensitySums[height-1][col] = UInt32(intensities[height - 1][col])
+        edginessSums[height-1][col] = UInt32(intensities[height - 1][col])
     }
     
     // adds from the bottom up, so it goes in reverse order
@@ -83,21 +83,21 @@ public func intensitySums(intensities: [[UInt8]]) -> (intensitySums: [[UInt32]],
             // if values are out of bounds the center value is used (that is what the min and maxes are doing)
             // our custom min function ignores them if they have the same value as the center
             let (minBelow, minIndex) = minWithIndex(
-                intensitySums[row + 1][max(col - 1, 0)],
-                intensitySums[row + 1][col],
-                intensitySums[row + 1][min(col + 1, width - 1)]
+                edginessSums[row + 1][max(col - 1, 0)],
+                edginessSums[row + 1][col],
+                edginessSums[row + 1][min(col + 1, width - 1)]
             )
             
-            // add together lowest intensity below and intensity of current pixel
-            let intensityForThisPixel = UInt32(intensities[row][col]) // cast up to prevent overflow when adding
-            intensitySums[row][col] = minBelow + intensityForThisPixel
+            // add together lowest edginess below and edginess of current pixel
+            let edginessForThisPixel = UInt32(intensities[row][col]) // cast up to prevent overflow when adding
+            edginessSums[row][col] = minBelow + edginessForThisPixel
             
             // add direction to the array
             directions[row][col] = minIndex - 1
         }
     }
     
-    return (intensitySums, directions)
+    return (edginessSums, directions)
 }
 
 // prefers the middle column if they are the same

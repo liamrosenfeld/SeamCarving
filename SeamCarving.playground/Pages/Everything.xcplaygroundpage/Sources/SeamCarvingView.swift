@@ -26,7 +26,7 @@ public struct SeamCarvingView: View {
         self._selectedImage = State(initialValue: imageNames.first!)
         
         // set images
-        let image = imageNames.first!.scaledImage()!
+        let image = imageNames.first!.scaledArgbImage()!
         self._origImage = State(initialValue: image)
         self._dispImage = _origImage
         self._origWidth = State(initialValue: Int(image.realSize.width))

@@ -14,14 +14,14 @@ public class IntermediateGenerator {
     func sums() -> CGImage {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
-        let (sums, _) = intensitySums(buffer: buffer)
+        let (sums, _) = edginessSums(buffer: buffer)
         return CGImage.scaledGrayscaleFromMatrix(sums)
     }
     
     func directions() -> CGImage {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
-        let (_, dirs) = intensitySums(buffer: buffer)
+        let (_, dirs) = edginessSums(buffer: buffer)
         let matrix = directionsToColorMatrix(dirs)
         return CGImage.argbFromMatrix(matrix)
     }
@@ -29,8 +29,8 @@ public class IntermediateGenerator {
     func seamOnSum() -> CGImage {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
-        let (sums, dirs) = intensitySums(buffer: buffer)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(buffer: buffer)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         let overlayed = overlaySeam(seam, on: sums, color: 10000)
         return CGImage.scaledGrayscaleFromMatrix(overlayed)
     }
@@ -38,8 +38,8 @@ public class IntermediateGenerator {
     func seamOnSobel() -> CGImage {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
-        let (sums, dirs) = intensitySums(buffer: buffer)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(buffer: buffer)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         let overlay = overlaySeam(seam, on: buffer.planarToMatrix(), color: 255)
         return CGImage.grayscaleFromMatrix(overlay)
     }
@@ -47,8 +47,8 @@ public class IntermediateGenerator {
     func seamOnOrig() -> CGImage {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
-        let (sums, dirs) = intensitySums(buffer: buffer)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(buffer: buffer)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         let imageMatrix = image.argbBuffer.argb8ToMatrix()
         let overlay = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000)
         return CGImage.argbFromMatrix(overlay)

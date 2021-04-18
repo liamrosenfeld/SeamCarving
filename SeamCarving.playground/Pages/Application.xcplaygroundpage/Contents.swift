@@ -20,11 +20,11 @@ func _carveImage(_ image: CGImage, width: Int) -> CGImage {
         let sobeledBuffer  = sobeledImage.planarBuffer
         
         // get sums from sobel
-        let (sums, dirs) = intensitySums(buffer: sobeledBuffer)
+        let (sums, dirs) = edginessSums(buffer: sobeledBuffer)
         sobeledBuffer.free()
         
         // find seam
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         var imageMatrix = carvedImage.argbBuffer.argb8ToMatrix()
         
         // apply seam
@@ -63,7 +63,7 @@ carved
  
  Currently, the Sobel filter is reapplied every time a row is removed from the image. When there are large gaps between edges in the image, that is not entirely necessary because the edges would not dramatically change between each pass.
  
- The nature of the seam removing function allows for this reuse because its objective is dodging pixels of high intensity in the Sobel output.
+ The nature of the seam removing function allows for this reuse because its objective is dodging pixels of high value in the Sobel output.
  
  However, on visually busier images, removing a seam might create an area of higher edginess than before causing the Sobel output to become meaningfully outdated and ultimately leading to more jarring removals.
  
@@ -86,8 +86,8 @@ func _sharedCarveImage(_ image: CGImage, width: Int) -> CGImage {
     
     for _ in 0..<widthDiff {
         // get sums and seam
-        let (sums, dirs) = intensitySums(intensities: sobelMatrix)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(intensities: sobelMatrix)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         
         // apply seam to both sobel and image
         removeSeam(seam, from: &imageMatrix)
@@ -154,8 +154,8 @@ func _balancedCarveImage(_ image: CGImage, width: Int, sobelPer: Int) -> CGImage
         }
         
         // get sum and seam
-        let (sums, dirs) = intensitySums(intensities: sobelMatrix)
-        let seam = findSeam(intensitySum: sums, directions: dirs)
+        let (sums, dirs) = edginessSums(intensities: sobelMatrix)
+        let seam = findSeam(edginessSums: sums, directions: dirs)
         
         // apply seam on image and sobel matrix
         removeSeam(seam, from: &imageMatrix)
