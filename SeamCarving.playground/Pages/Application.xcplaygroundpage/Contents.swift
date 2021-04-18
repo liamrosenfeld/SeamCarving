@@ -65,7 +65,7 @@ carved
  
  The nature of the seam removing function allows for this reuse because its objective is dodging pixels of high value in the Sobel output.
  
- However, on visually busier images, removing a seam might create an area of higher edginess than before causing the Sobel output to become meaningfully outdated and ultimately leading to more jarring removals.
+ However, on visually busier images, removing a seam might create an area of higher edginess than before, causing the Sobel output to become meaningfully outdated and ultimately leading to more jarring removals.
  
  That Sobel sharing function can be implemented as shown below.
  
@@ -128,7 +128,7 @@ sharedCarve
  
  ## Balancing Optimization with Results
  
- A balance could further be struck by recalculating the Sobel filter every after every so many rows are removed. That should allow the formation of new edges, such as with the mountains, to be caught before they become too much of an issue.
+ A balance could further be struck by recalculating the Sobel filter after every so many rows are removed. That should allow the formation of new edges, such as with the mountains, to be caught before they become too much of an issue.
  
  That can be implemented as follows:
  */
@@ -183,7 +183,7 @@ balancedCarve
  
  The improvement in quality found in the balanced method it able to occur while not still not taking much longer than the fully shared Sobel method.
  
- ![Total time of all](/TotalTimeShared.png)
+ ![Total time of all](/TotalTimeAll.png)
  
  The unique Sobel is making the scale too small to see the slight difference between the lower three. While that effectively demonstrates how much of an improvement this is in performance, let's also cut it out to get a better view.
  
@@ -204,7 +204,7 @@ balancedCarve
  
  ![Time per pixel](/AvgTimePerPixel.png)
 
- While that understanding is not required to understand the code, I feel it is an interesting opportunity to grow one's understanding of the functioning of the algorithm.
+ While that understanding is not required to understand the code, I feel it is an interesting opportunity to grow one's understanding of how the algorithm functions.
  
  That's all of the content to cover! Next, you'll be able to use an interactive demo to experience the algorithm in action.
  

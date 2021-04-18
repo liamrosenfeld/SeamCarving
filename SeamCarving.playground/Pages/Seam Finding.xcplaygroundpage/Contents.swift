@@ -4,7 +4,7 @@
  Seams will be what we call the path of pixels that we remove from the image to reduce its width.
  
  Our criteria for the seam is as follows:
- - The path that crosses the least edges (value of pixel from the Sobel Filter)
+ - The path that crosses the least edges (as determined by the Sobel filter)
  - The path can lead to the three pixels under it (directly under and both diagonally adjacent)
  
  Those three candidates are shown on this diagram:
@@ -13,17 +13,17 @@
  
  ## Possible Algoritms
  
- One attempt at finding this seem may be using a greedy algorithm. A greedy algorithm is one that always picks the immediately most optimal option. In this case, it would always pick the lowest of the three three candidates available for each row of the image.
+ One attempt at finding the seam may be using a greedy algorithm. A greedy algorithm is one that always picks the immediately most optimal option. In this case, it would always pick the lowest of the three three candidates available for each row of the image.
  
  While that may be optimized for performance, it has issues consistently finding the best path.
  
- The seam has a maximum horizontal speed of one column per row, so taking a strictly greedy algorithm could easily get the seam stuck only having candidates with high edginess later in the image.
+ The seam has a maximum horizontal speed of one column per row, so taking a strictly greedy algorithm could easily get the seam stuck only having candidates with high edginess (value of pixel from the Sobel Filter output) of the later in the image.
  
  The pitfall of not knowing if the path is the most optimal path possible can be removed by using an algorithm that checks for all possible paths through an image.
  
  It would then choose the path where the sum of all the edginess values is the least. While that would always give us the best possible path through an image, it is also extremely slow.
  
- The time complexity of that method would on the order of cols * 3^rows, which means it would not be practical use on any reasonably sized image.
+ The time complexity of that method would be on the order of cols * 3^rows, so it would not be of practical use on any reasonably sized image.
  
  ## Optimizing Through Dynamic Programming
  
@@ -33,13 +33,13 @@
  
  That allows us to assign each pixel a value of the total edginess of the most optimal path to the bottom. Using that value for calculating the value of pixels above greatly decreases the amount of redundant work needed—a major dynamic programming win.
  
- To find the value for each pixel, the matrix of sums can be built from the bottom up. Since the total sum at each candidate would be known, all that would be necessary for finding the sum at each pixel is to add minimum candidate sum and the value of itself.
+ To find the value for each pixel, the matrix of sums can be built from the bottom up. Since the total sum at each candidate would be known, all that would be necessary for finding the sum at each pixel is to add the minimum sum of the candidates and the value of itself.
 
  That greatly optimizes the algorithm by removing the redundant work, bringing the time complexity down to the much more reasonable 3 * rows * cols.
  
  # Implementation
  
- We fist need a min function that is able to find the minimum value and the index of that value. While an enumerated array would make sense for finding the minimum amount of a larger collection of values, a flattened version is more performance friendly.
+ We first need a min function that is able to find the minimum value and the index of that value. While an enumerated array would make sense for finding the minimum amount of a larger collection of values, a flattened version is more performance friendly at this scale.
  
  This function also differs from most min finding functions because it prefers the middle value over the sides if they are equal.
  
@@ -73,7 +73,7 @@ func minWithIndex(_ val0: UInt32, _ val1: UInt32, _ val2: UInt32) -> (val: UInt3
  
  Our function will take the result of our Sobel filter as an 8-bit planar accelerate buffer.
  
- It will the return the sum and the direction to the smallest candidate at each pixel as two separate matrixes.
+ It will return the sum and the direction (to the candidate chosen) at each pixel as two separate matrixes.
  They will both be needed to calculate our seam.
  
  How each part of the function works is explained in the inline comments.
@@ -161,7 +161,7 @@ sumsImage
 dirsImage
 
 /*:
- The triangular pattern that appears in the sums is significant because it marks out places, that if the path ever touched, there would be no way to dodge the edge causing the triangle because of the maximum rate the path can travel horizontally.
+ The triangular pattern that appears above edges in the sums is significant because it marks out places, that if the path ever touched, there would be no way to dodge the edge. That reflects the maximum rate the path can travel horizontally.
  
  # Seam Finding
  

@@ -3,7 +3,12 @@
  
  Now that we have covered how the seam carving algorithm works, here's a live view to play with.
  
- I initially wrote this code in a Xcode project to be able to debug and profile. However, it runs significantly slower in playgrounds because it uses a debug build instead of a release build. Code that would take 100 milliseconds instead takes 8 seconds. I do not know of any way around this, so I just advise to not remove too many pixels and to keep the sobelPer value on the high side.
+ Just enter the desired width (must be smaller than the width of the original image) and click apply to seam carve.
+ 
+ I initially wrote this code in a Xcode project to be able to debug and profile.
+ However, it runs significantly slower in playgrounds because it uses a debug build instead of a release build.
+ Code that would take 100 milliseconds instead takes 8 seconds.
+ I do not know of any way around this, so I just advise to not remove too many pixels and to keep the sobelPer value on the high side.
  
  Feel free to try this out on your own images! Just drag them into the images folder of the global resources folder and then run this page.
  

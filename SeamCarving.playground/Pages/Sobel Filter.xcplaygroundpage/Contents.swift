@@ -1,7 +1,7 @@
 /*:
  # Sobel Filter
  
- To remove the that pixels are unnecessary, we first must find which pixels are necessary.
+ To remove the pixels that are unnecessary, we first must find which pixels are necessary.
  
  In this case, necessary means pixels where it would be visually jarring for them to be removed.
  
@@ -20,8 +20,8 @@
  One example of a kernel is the differentiation kernel, which as it's name suggests approximates the value of the derivative of color at a selected pixel. The kernel for that is as follows:
  
  ```
- Gx = [+1 0 -1]
- Gy = [
+ Dx = [+1 0 -1]
+ Dy = [
     +1
     0
     -1
@@ -33,12 +33,12 @@
  Another would be an averaging kernel, which takes a weighted average of the current pixel and its vertical neighbors. The kernel for that is as follows:
  
  ```
- Gy = [
+ Ay = [
     1
     2
     1
  ]
- Gy = [1 2 1]
+ Ay = [1 2 1]
  ```
  
  ## The Sobel Filter
@@ -47,12 +47,12 @@
  
  The kernel is as follows:
  ```
- Gx = [
+ Sx = [
     +1 0 -1
     +2 0 -2
     +1 0 -1
  ]
- Gy = [
+ Sy = [
     +1 +2 +1
      0  0  0
     -1 -2 -1
@@ -66,7 +66,7 @@
  
  ## Implementation
  
- Now that understand how to convolutions work, let's write the code to make it happen.
+ Now that we understand how image convolutions work, let's write the code to make it happen.
  
  This will use Metal to do the operation because convolutions are a highly regular operation applied to a whole image, so running it on a GPU would provide a significant time and efficiency advantage.
  
