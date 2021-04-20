@@ -195,8 +195,13 @@ func _findSeam(edginessSums: [[UInt32]], directions: [[Int8]]) -> [Int] {
 
 let seam = findSeam(edginessSums: sums, directions: dirs)
 
-var imageMatrix = image.argbBuffer.argb8ToMatrix()
-let overlayedMatrix = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000) // draw the seam in bid endian green
+// get matrix of original image
+let imageBuffer = image.argbBuffer
+var imageMatrix = imageBuffer.argb8ToMatrix()
+imageBuffer.free()
+
+// overlay seam and get image
+let overlayedMatrix = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000) // draw the seam in big endian green
 let overlayedImage = CGImage.argbFromMatrix(overlayedMatrix)
 
 //: You can see how the green line dodges important parts of the image

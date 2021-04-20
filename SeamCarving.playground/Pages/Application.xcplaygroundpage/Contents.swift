@@ -16,8 +16,8 @@ func _carveImage(_ image: CGImage, width: Int) -> CGImage {
     let widthDiff = image.width - width
     for _ in 0..<widthDiff {
         // get sobeled image
-        let sobeledImage = sobel(carvedImage)
-        let sobeledBuffer  = sobeledImage.planarBuffer
+        let sobeledImage  = sobel(carvedImage)
+        let sobeledBuffer = sobeledImage.planarBuffer
         
         // get sums from sobel
         let (sums, dirs) = edginessSums(buffer: sobeledBuffer)
@@ -25,7 +25,11 @@ func _carveImage(_ image: CGImage, width: Int) -> CGImage {
         
         // find seam
         let seam = findSeam(edginessSums: sums, directions: dirs)
-        var imageMatrix = carvedImage.argbBuffer.argb8ToMatrix()
+        
+        // get matrix of image
+        let imageBuffer = carvedImage.argbBuffer
+        var imageMatrix = imageBuffer.argb8ToMatrix()
+        imageBuffer.free()
         
         // apply seam
         removeSeam(seam, from: &imageMatrix)
@@ -72,11 +76,14 @@ func _sharedCarveImage(_ image: CGImage, width: Int) -> CGImage {
     let widthDiff = image.width - width
     
     // get sobeled image
-    let sobeledImage = sobel(image)
+    let sobeledImage  = sobel(image)
     let sobeledBuffer = sobeledImage.planarBuffer
     
     // get matrix of both
-    var imageMatrix = image.argbBuffer.argb8ToMatrix()
+    let imageBuffer = image.argbBuffer
+    var imageMatrix = imageBuffer.argb8ToMatrix()
+    imageBuffer.free()
+    
     var sobelMatrix = sobeledBuffer.planarToMatrix()
     sobeledBuffer.free()
     
@@ -133,20 +140,24 @@ func _balancedCarveImage(_ image: CGImage, width: Int, sobelPer: Int) -> CGImage
     let widthDiff = image.width - width
     
     // apply initial sobel
-    let sobeledImage = sobel(image)
-    let grayscale = sobeledImage.planarBuffer
+    let sobeledImage  = sobel(image)
+    let sobeledBuffer = sobeledImage.planarBuffer
     
     // get matrixes of orig and sobel
-    var imageMatrix = image.argbBuffer.argb8ToMatrix()
-    var sobelMatrix = grayscale.planarToMatrix()
-    grayscale.free()
+    let imageBuffer = image.argbBuffer
+    var imageMatrix = imageBuffer.argb8ToMatrix()
+    imageBuffer.free()
+    
+    var sobelMatrix = sobeledBuffer.planarToMatrix()
+    sobeledBuffer.free()
     
     for removalNum in 0..<widthDiff {
         // reapply and replace sobel matrix every sobelPer
         if removalNum % sobelPer == 0 {
             let sobeledImage = sobel(CGImage.argbFromMatrix(imageMatrix))
-            let grayscale = sobeledImage.planarBuffer
-            sobelMatrix = grayscale.planarToMatrix()
+            let sobeledBuffer = sobeledImage.planarBuffer
+            sobelMatrix = sobeledBuffer.planarToMatrix()
+            sobeledBuffer.free()
         }
         
         // get sum and seam

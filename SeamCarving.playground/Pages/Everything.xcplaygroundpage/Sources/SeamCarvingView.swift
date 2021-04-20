@@ -42,8 +42,6 @@ public struct SeamCarvingView: View {
     public var body: some View {
         VStack {
             Image(nsImage: dispImage)
-                .resizable()
-                .scaledToFit()
                 .frame(width: 350, height: 350)
             
             HStack {

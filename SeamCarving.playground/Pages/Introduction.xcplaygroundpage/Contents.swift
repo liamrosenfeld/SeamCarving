@@ -16,7 +16,7 @@
  Note:
  - Some pages may take a couple seconds to run because there are some computation heavy operations. The results view will update during, so you would be able to tell the difference between computing and playgrounds hanging.
  - Due to the highly iterative nature of some code in this playground, the results sidebar would slow it down dramatically. For that reason, code is sometimes explained and then run from somewhere else. This is often done by prefixing functions on the page with an underscore and then calling one without.
- - A good amount of code that is unnecessary for understanding the central algorithm is abstracted away as functions. If you would like to see it, you can either jump to definition or look through the global sources folder of the playground.
+ - A good amount of code that is unnecessary for understanding the central algorithm is abstracted away as functions. If you would like to see it, you can either jump to definition or look through the global sources folder of the playground. Because of a playgrounds bug, those files are sometimes marked as full of errors, however you can just ignore them and run it anyway.
  
  _(To skip the explanation pages, jump to the [last page](Everything))_
  

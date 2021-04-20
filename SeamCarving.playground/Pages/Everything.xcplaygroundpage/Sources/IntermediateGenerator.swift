@@ -15,6 +15,7 @@ public class IntermediateGenerator {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
         let (sums, _) = edginessSums(buffer: buffer)
+        buffer.free()
         return CGImage.scaledGrayscaleFromMatrix(sums)
     }
     
@@ -22,6 +23,7 @@ public class IntermediateGenerator {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
         let (_, dirs) = edginessSums(buffer: buffer)
+        buffer.free()
         let matrix = directionsToColorMatrix(dirs)
         return CGImage.argbFromMatrix(matrix)
     }
@@ -30,6 +32,7 @@ public class IntermediateGenerator {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
         let (sums, dirs) = edginessSums(buffer: buffer)
+        buffer.free()
         let seam = findSeam(edginessSums: sums, directions: dirs)
         let overlayed = overlaySeam(seam, on: sums, color: 10000)
         return CGImage.scaledGrayscaleFromMatrix(overlayed)
@@ -39,6 +42,7 @@ public class IntermediateGenerator {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
         let (sums, dirs) = edginessSums(buffer: buffer)
+        buffer.free()
         let seam = findSeam(edginessSums: sums, directions: dirs)
         let overlay = overlaySeam(seam, on: buffer.planarToMatrix(), color: 255)
         return CGImage.grayscaleFromMatrix(overlay)
@@ -48,8 +52,11 @@ public class IntermediateGenerator {
         let sobeled = sobel(image)
         let buffer = sobeled.planarBuffer
         let (sums, dirs) = edginessSums(buffer: buffer)
+        buffer.free()
         let seam = findSeam(edginessSums: sums, directions: dirs)
-        let imageMatrix = image.argbBuffer.argb8ToMatrix()
+        let imageBuffer = image.argbBuffer
+        let imageMatrix = imageBuffer.argb8ToMatrix()
+        imageBuffer.free()
         let overlay = overlaySeam(seam, on: imageMatrix, color: 0x00FF0000)
         return CGImage.argbFromMatrix(overlay)
     }
