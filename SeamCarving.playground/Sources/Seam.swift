@@ -1,10 +1,3 @@
-//
-//  Seam.swift
-//  tester
-//
-//  Created by Liam Rosenfeld on 4/10/21.
-//
-
 import Foundation
 
 public func findSeam(edginessSums: [[UInt32]], directions: [[Int8]]) -> [Int] {

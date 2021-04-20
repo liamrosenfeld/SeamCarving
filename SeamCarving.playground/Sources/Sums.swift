@@ -1,10 +1,3 @@
-//
-//  Sums.swift
-//  tester
-//
-//  Created by Liam Rosenfeld on 4/10/21.
-//
-
 import Accelerate.vImage
 
 public func edginessSums(buffer: vImage_Buffer) -> (edginessSums: [[UInt32]], directions: [[Int8]]) {

@@ -83,8 +83,8 @@ public struct SeamCarvingView: View {
             Group {
                 Text("Carve Seams")
                 HStack {
-                    NumberField("Width", value: $newWidth, max: origWidth)
-                    NumberField("Sobel Per", value: $sobelPer, max: newWidth)
+                    NumberField("Width", value: $newWidth, range: 1...origWidth)
+                    NumberField("Sobel Per", value: $sobelPer, range: 1...newWidth)
                 }
                 HStack {
                     Button("Apply", action: applyWidth)

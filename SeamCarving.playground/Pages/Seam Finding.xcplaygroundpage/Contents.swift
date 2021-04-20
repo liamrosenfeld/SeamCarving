@@ -5,7 +5,7 @@
  
  Our criteria for the seam is as follows:
  - The path that crosses the least edges (as determined by the Sobel filter)
- - The path can lead to the three pixels under it (directly under and both diagonally adjacent)
+ - The path can lead to the three pixels under the current pixel (directly under and both diagonally adjacent)
  
  Those three candidates are shown on this diagram:
  
@@ -23,7 +23,7 @@
  
  It would then choose the path where the sum of all the edginess values is the least. While that would always give us the best possible path through an image, it is also extremely slow.
  
- The time complexity of that method would be on the order of cols * 3^rows, so it would not be of practical use on any reasonably sized image.
+ The time complexity of that method would be on the order of `cols * 3^rows`, so it would not be of practical use on any reasonably sized image.
  
  ## Optimizing Through Dynamic Programming
  
@@ -35,7 +35,7 @@
  
  To find the value for each pixel, the matrix of sums can be built from the bottom up. Since the total sum at each candidate would be known, all that would be necessary for finding the sum at each pixel is to add the minimum sum of the candidates and the value of itself.
 
- That greatly optimizes the algorithm by removing the redundant work, bringing the time complexity down to the much more reasonable 3 * rows * cols.
+ That greatly optimizes the algorithm by removing the redundant work, bringing the time complexity down to the much more reasonable `3 * rows * cols`.
  
  # Implementation
  
@@ -43,7 +43,7 @@
  
  This function also differs from most min finding functions because it prefers the middle value over the sides if they are equal.
  
- This is preferable because they are equal when there is no left or right pixel (min and max are used to prevent overflows inline) along with general preference for the seam to travel straight down if the options happen to be equivalent (leads to a generally less noticeable removal).
+ This is preferable because they are equal when there is no left or right pixel (min and max are used to prevent overflows inline in our summing function) along with general preference for the seam to travel straight down if the options happen to be equivalent (leads to a generally less noticeable removal).
  
  This min function with our specific criteria can be implemented as below:
  */

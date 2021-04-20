@@ -43,7 +43,7 @@
  
  ## The Sobel Filter
  
- Now that we have covered the basics of how image convolutions function let's hone in on the specific convolution we will be utilizing for edge detection: the Sobel filter.
+ Now that we have covered the basics of how image convolutions function, let's hone in on the specific convolution we will be utilizing for edge detection: the Sobel filter.
  
  The kernel is as follows:
  ```
@@ -127,8 +127,8 @@ import MetalKit
 
 // get image
 // this playground will use The Persistence Of Memory by Salvador Dalí during the explanation sections
-// that is because of how its well defined edges and open areas
-// more images (including your own) will be available to use on the last page)
+// that is because it has well defined edges and open areas
+// more images (including your own) will be available to use on the last page
 let image = ImageFile.get(named: "pom.png").scaledArgbImage()!.cgImage
 
 // calling a metal function has a bit of boilerplate

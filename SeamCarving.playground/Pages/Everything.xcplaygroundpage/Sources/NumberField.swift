@@ -3,17 +3,17 @@ import Combine
 
 public struct NumberField: View {
     
-    init(_ title: String, value: Binding<Int>, max: Int) {
+    init(_ title: String, value: Binding<Int>, range: ClosedRange<Int>) {
         self._numberValue = value
         self._stringValue = State.init(initialValue: "\(value)")
         self._title = State.init(initialValue: title)
-        self.max = max
+        self.range = range
     }
     
     @Binding var numberValue: Int
     @State private var stringValue: String
     @State private var title: String
-    var max: Int
+    var range: ClosedRange<Int>
     
     public var body: some View {
         HStack {
@@ -22,7 +22,7 @@ public struct NumberField: View {
                 .labelsHidden()
                 .frame(maxWidth: 75)
                 .onReceive(Just(stringValue)) { newValue in
-                    guard let num = Int(newValue), (0...max).contains(num) else {
+                    guard let num = Int(newValue), range.contains(num) else {
                         self.stringValue = String(numberValue)
                         return
                     }
